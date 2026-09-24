@@ -1,0 +1,25 @@
+{
+  "platforms": {
+    "facebook": {
+      "success": true,
+      "status": "published",
+      "remote_id": "facebook-post-id",
+      "message": "Published",
+      "response_code": 200
+    },
+    "linkedin": {
+      "success": true,
+      "status": "published",
+      "remote_id": "linkedin-post-urn",
+      "message": "Published",
+      "response_code": 201
+    },
+    "x": {
+      "success": false,
+      "status": "failed",
+      "remote_id": "",
+      "message": "Invalid access token",
+      "response_code": 401
+    }
+  }
+}
