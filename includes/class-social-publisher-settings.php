@@ -12,7 +12,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class TGSP_Settings {
 	const PAGE = 'tgsp-settings';
 	const OPENAI_MODEL = 'gpt-6-luna';
-	const LEGACY_OPENAI_MODEL = 'gpt-5-mini';
 
 	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'add_page' ) );
@@ -154,7 +153,14 @@ final class TGSP_Settings {
 
 	public static function sanitize_delivery_method( $value ) { return in_array( $value, array( 'buffer', 'webhook' ), true ) ? $value : 'buffer'; }
 	public static function sanitize_openai_key( $value ) { $value = sanitize_text_field( (string) $value ); return '' === $value ? (string) get_option( 'tgsp_openai_api_key', '' ) : $value; }
-	public static function sanitize_openai_model( $value ) { $value = sanitize_text_field( (string) $value ); return '' === $value || self::LEGACY_OPENAI_MODEL === $value ? self::OPENAI_MODEL : $value; }
+	public static function sanitize_openai_model( $value ) {
+		$model = trim( sanitize_text_field( (string) $value ) );
+		if ( '' === $model ) {
+			add_settings_error( 'tgsp_openai_model', 'tgsp_openai_model_required', __( 'Enter an OpenAI model ID.', 'techgenyz-social-publisher' ) );
+			return self::openai_model();
+		}
+		return $model;
+	}
 	public static function sanitize_openai_caption_prompt( $value ) {
 		$value = wp_kses_post( (string) $value );
 		return '' === TGSP_OpenAI_Client::normalize_caption_prompt( $value ) ? '' : $value;
@@ -185,7 +191,10 @@ final class TGSP_Settings {
 	}
 	public static function openai_key_field() { self::masked_key_field( 'tgsp_openai_api_key', 'tgsp_openai_api_key', __( 'Stored server-side and never sent to browser JavaScript. TGSP_OPENAI_API_KEY may be defined in wp-config.php instead.', 'techgenyz-social-publisher' ) ); }
 	public static function buffer_key_field() { self::masked_key_field( 'tgsp_buffer_api_key', 'tgsp_buffer_api_key', __( 'Stored server-side and never sent to browser JavaScript. TGSP_BUFFER_API_KEY may be defined in wp-config.php instead.', 'techgenyz-social-publisher' ) ); }
-	public static function openai_model_field() { printf( '<input type="text" class="regular-text code" name="tgsp_openai_model" value="%s" />', esc_attr( self::openai_model() ) ); }
+	public static function openai_model_field() {
+		printf( '<input type="text" class="regular-text code" name="tgsp_openai_model" value="%s" />', esc_attr( self::openai_model() ) );
+		echo '<p class="description">' . esc_html__( 'Enter the exact OpenAI model ID to use for caption generation. You can change the model here without modifying plugin code.', 'techgenyz-social-publisher' ) . '</p>';
+	}
 	public static function openai_caption_prompt_field() {
 		$value = (string) get_option( 'tgsp_openai_caption_prompt', '' );
 		if ( '' === TGSP_OpenAI_Client::normalize_caption_prompt( $value ) ) {
@@ -206,12 +215,8 @@ final class TGSP_Settings {
 		echo '<p class="description">' . esc_html__( 'Controls how OpenAI generates Facebook, LinkedIn, and X captions from the supplied WordPress article. Leave empty to use the built-in default. The plugin continues to enforce its technical output validation.', 'techgenyz-social-publisher' ) . '</p>';
 	}
 	public static function openai_model() {
-		$model = (string) get_option( 'tgsp_openai_model', self::OPENAI_MODEL );
-		if ( self::LEGACY_OPENAI_MODEL === $model ) {
-			update_option( 'tgsp_openai_model', self::OPENAI_MODEL, false );
-			return self::OPENAI_MODEL;
-		}
-		return '' === trim( $model ) ? self::OPENAI_MODEL : $model;
+		$model = trim( (string) get_option( 'tgsp_openai_model', self::OPENAI_MODEL ) );
+		return '' === $model ? self::OPENAI_MODEL : $model;
 	}
 	public static function buffer_organization_field() { printf( '<input id="tgsp_buffer_organization_id" type="text" class="regular-text code" name="tgsp_buffer_organization_id" value="%s" />', esc_attr( get_option( 'tgsp_buffer_organization_id', '' ) ) ); }
 	public static function buffer_channel_field( $args ) { $platform = sanitize_key( $args['platform'] ); $value = (string) get_option( 'tgsp_buffer_channel_' . $platform, '' ); printf( '<select id="tgsp_buffer_channel_%1$s" name="tgsp_buffer_channel_%1$s"><option value="">%2$s</option>%3$s</select>', esc_attr( $platform ), esc_html__( 'Select a channel', 'techgenyz-social-publisher' ), $value ? '<option value="' . esc_attr( $value ) . '" selected>' . esc_html( $value ) . '</option>' : '' ); }
