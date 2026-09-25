@@ -2,14 +2,14 @@
 /**
  * Social publishing payload builder.
  *
- * @package TechGenyzSocialPublisher
+ * @package AISocialPublisher
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-final class TGSP_Social_Payload {
+final class AISP_Social_Payload {
 	/**
 	 * Builds the webhook payload for a post and selected platforms.
 	 *
@@ -41,9 +41,9 @@ final class TGSP_Social_Payload {
 			'published_date' => get_post_time( DATE_ATOM, true, $post ),
 			'site_name'      => $values['site_name'],
 			'captions'       => array(
-				'facebook' => TGSP_Caption_Generator::generate( 'facebook', $values ),
-				'linkedin' => TGSP_Caption_Generator::generate( 'linkedin', $values ),
-				'x'        => TGSP_Caption_Generator::generate( 'x', $values ),
+				'facebook' => AISP_Caption_Generator::generate( 'facebook', $values ),
+				'linkedin' => AISP_Caption_Generator::generate( 'linkedin', $values ),
+				'x'        => AISP_Caption_Generator::generate( 'x', $values ),
 			),
 			'platforms'      => $enabled,
 		);

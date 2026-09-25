@@ -2,9 +2,9 @@
 /** Platform-specific caption generation. */
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-final class TGSP_Caption_Generator {
+final class AISP_Caption_Generator {
 	public static function generate( $platform, array $values ) {
-		$platform = sanitize_key( $platform ); $template = (string) get_option( 'tgsp_' . $platform . '_caption_template', '' );
+		$platform = sanitize_key( $platform ); $template = (string) get_option( 'aisp_' . $platform . '_caption_template', '' );
 		if ( '' === trim( $template ) ) { $template = self::default_template( $platform ); }
 		$replacements = array(); foreach ( $values as $key => $value ) { $replacements[ '{' . $key . '}' ] = (string) $value; }
 		$caption = trim( strtr( $template, $replacements ) );
@@ -12,7 +12,7 @@ final class TGSP_Caption_Generator {
 	}
 
 	public static function default_template( $platform ) {
-		$legacy = (string) get_option( 'tgsp_message_format', '' ); if ( '' !== trim( $legacy ) ) { return $legacy; }
+		$legacy = (string) get_option( 'aisp_message_format', '' ); if ( '' !== trim( $legacy ) ) { return $legacy; }
 		$defaults = array( 'facebook' => "{title}\n\n{excerpt}\n\nRead more: {url}", 'linkedin' => "{title}\n\n{excerpt}\n\nRead the full article: {url}", 'x' => "{title}\n\n{url}" );
 		return isset( $defaults[ $platform ] ) ? $defaults[ $platform ] : "{title}\n\n{url}";
 	}

@@ -1,0 +1,76 @@
+<?php
+/**
+ * Plugin Name:       AI Social Publisher
+ * Description:       Generates social captions with OpenAI and publishes immediately through Buffer.
+ * Version:           1.0.0
+ * Requires at least: 6.2
+ * Requires PHP:      7.4
+ * Author:            Abhinava Innovations
+ * License:           GPL-2.0-or-later
+ * Text Domain:       ai-social-publisher
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+define( 'AISP_VERSION', '1.0.0' );
+define( 'AISP_DEVELOPMENT_VERSION', '1.6.2' );
+define( 'AISP_FILE', __FILE__ );
+define( 'AISP_DIR', plugin_dir_path( __FILE__ ) );
+define( 'AISP_URL', plugin_dir_url( __FILE__ ) );
+
+require_once AISP_DIR . 'includes/class-social-publisher-logger.php';
+require_once AISP_DIR . 'includes/class-ai-social-publisher-migration.php';
+require_once AISP_DIR . 'includes/class-social-publisher-security.php';
+// Retained for backward compatibility; the social manager is the active delivery path.
+require_once AISP_DIR . 'includes/class-social-publisher-webhook.php';
+require_once AISP_DIR . 'includes/social/class-caption-generator.php';
+require_once AISP_DIR . 'includes/social/class-social-payload.php';
+require_once AISP_DIR . 'includes/social/class-normalized-response.php';
+require_once AISP_DIR . 'includes/social/class-social-webhook.php';
+require_once AISP_DIR . 'includes/social/class-openai-client.php';
+require_once AISP_DIR . 'includes/social/class-buffer-client.php';
+require_once AISP_DIR . 'includes/social/class-social-manager.php';
+require_once AISP_DIR . 'includes/class-social-publisher-settings.php';
+require_once AISP_DIR . 'includes/class-social-publisher-metabox.php';
+
+/**
+ * Creates the log table on activation.
+ */
+function aisp_activate() {
+	AISP_Logger::create_table();
+	AISP_Identity_Migration::run();
+}
+register_activation_hook( __FILE__, 'aisp_activate' );
+
+/**
+ * Boots admin-only functionality.
+ */
+function aisp_boot() {
+	AISP_Identity_Migration::run();
+
+	// REST routes must be registered on REST requests; all UI remains admin-only.
+	AISP_Metabox::init();
+
+	if ( is_admin() ) {
+		if ( AISP_VERSION !== get_option( 'aisp_db_version' ) ) {
+			AISP_Logger::create_table();
+		}
+		AISP_Settings::init();
+	}
+}
+add_action( 'plugins_loaded', 'aisp_boot' );
+
+/**
+ * Adds a direct Settings link on the Plugins screen.
+ *
+ * @param array $links Existing plugin action links.
+ * @return array
+ */
+function aisp_plugin_action_links( $links ) {
+	$url = admin_url( 'admin.php?page=' . AISP_Settings::PAGE );
+	array_unshift( $links, '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Settings', 'ai-social-publisher' ) . '</a>' );
+	return $links;
+}
+add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'aisp_plugin_action_links' );

@@ -1,8 +1,8 @@
-# AGENTS.md — TechGenyz Social Publisher Production Release Procedure
+# AGENTS.md — AI Social Publisher Production Release Procedure
 
 ## Purpose
 
-This file defines the mandatory operating procedure for Codex when working on the TechGenyz Social Publisher repository.
+This file defines the mandatory operating procedure for Codex when working on the AI Social Publisher repository.
 
 The most important rule is:
 
@@ -76,7 +76,7 @@ If documentation and source disagree about current behavior, inspect the source 
 Before significant implementation or production packaging:
 
 1. Inspect the complete project structure.
-2. Inspect `techgenyz-social-publisher.php`.
+2. Inspect `ai-social-publisher.php`.
 3. Inspect `uninstall.php`.
 4. Inspect the settings class.
 5. Inspect the admin/meta-box and REST class.
@@ -139,27 +139,27 @@ If a requested change conflicts with one of these invariants, call out the confl
 
 # 6. Development Version Authority
 
-TechGenyz Social Publisher must use an explicit Development Version source of truth separate from production release numbering.
+AI Social Publisher must use an explicit Development Version source of truth separate from production release numbering.
 
 The intended authoritative source is:
 
 ```text
-TGSP_DEVELOPMENT_VERSION
+AISP_DEVELOPMENT_VERSION
 ```
 
 inside:
 
 ```text
-techgenyz-social-publisher/techgenyz-social-publisher.php
+ai-social-publisher/ai-social-publisher.php
 ```
 
 ## Current authority state
 
-The current source defines `TGSP_DEVELOPMENT_VERSION`, and it is the sole authority for the Development Version.
+The current source defines `AISP_DEVELOPMENT_VERSION`, and it is the sole authority for the Development Version.
 
 The following must never override it:
 
-- `TGSP_VERSION`
+- `AISP_VERSION`
 - plugin header version
 - `readme.txt` stable tag
 - ZIP filename
@@ -180,7 +180,7 @@ The Candidate Production Version must be calculated only from the Last Productio
 Never infer a Last Production Version from:
 
 - the current test-build filename;
-- `TGSP_VERSION`;
+- `AISP_VERSION`;
 - the plugin header;
 - the stable tag;
 - changelog entries;
@@ -199,16 +199,16 @@ Production packaging must never mutate the working development source merely to 
 
 When both version authorities are established:
 
-1. Read the current Development Version from `TGSP_DEVELOPMENT_VERSION`.
+1. Read the current Development Version from `AISP_DEVELOPMENT_VERSION`.
 2. Read the Last Production Version from the ledger in `PRODUCTION_HANDOFF.md`.
 3. Calculate the Candidate Production Version only from that ledger.
 4. Create a clean temporary staging copy.
 5. Copy only production/runtime-required files into the staging copy.
 6. In the staging copy only, set:
    - plugin header version = Candidate Production Version;
-   - `TGSP_VERSION` = Candidate Production Version;
+   - `AISP_VERSION` = Candidate Production Version;
    - `readme.txt` stable tag = Candidate Production Version when `readme.txt` is shipped;
-7. Preserve `TGSP_DEVELOPMENT_VERSION` unchanged in the staged package.
+7. Preserve `AISP_DEVELOPMENT_VERSION` unchanged in the staged package.
 8. Leave the working development source unchanged.
 9. Build the ZIP from the staged copy.
 10. Inspect the actual ZIP.
@@ -227,43 +227,43 @@ Do not rename, reset, or remove existing stored identifiers casually.
 Important current options include:
 
 ```text
-tgsp_delivery_method
-tgsp_openai_api_key
-tgsp_openai_model
-tgsp_openai_caption_prompt
-tgsp_buffer_api_key
-tgsp_buffer_organization_id
-tgsp_buffer_channel_facebook
-tgsp_buffer_channel_linkedin
-tgsp_buffer_channel_x
-tgsp_webhook_url
-tgsp_webhook_secret
-tgsp_webhook_connection_status
-tgsp_webhook_last_success
-tgsp_enable_facebook
-tgsp_enable_linkedin
-tgsp_enable_x
-tgsp_facebook_caption_template
-tgsp_linkedin_caption_template
-tgsp_x_caption_template
-tgsp_message_format
-tgsp_debug_logging
-tgsp_db_version
+aisp_delivery_method
+aisp_openai_api_key
+aisp_openai_model
+aisp_openai_caption_prompt
+aisp_buffer_api_key
+aisp_buffer_organization_id
+aisp_buffer_channel_facebook
+aisp_buffer_channel_linkedin
+aisp_buffer_channel_x
+aisp_webhook_url
+aisp_webhook_secret
+aisp_webhook_connection_status
+aisp_webhook_last_success
+aisp_enable_facebook
+aisp_enable_linkedin
+aisp_enable_x
+aisp_facebook_caption_template
+aisp_linkedin_caption_template
+aisp_x_caption_template
+aisp_message_format
+aisp_debug_logging
+aisp_db_version
 ```
 
 Important current post-meta keys include:
 
 ```text
-_social_publisher_status
-_social_publisher_sent_time
-_social_publisher_lock
-_social_publisher_platform_statuses
+_aisp_status
+_aisp_sent_time
+_aisp_lock
+_aisp_platform_statuses
 ```
 
 Important database identity:
 
 ```text
-{$wpdb->prefix}social_publish_logs
+{$wpdb->prefix}aisp_publish_logs
 ```
 
 Activation, upgrade, reactivation, or replacement must not overwrite a valid saved delivery method, API configuration, channel mapping, caption template, publishing state, or historical log row unless an explicit migration requires it.
@@ -294,7 +294,7 @@ If a deactivation hook is added in the future, audit it specifically for data de
 The current destructive uninstall authority is deliberately explicit:
 
 ```text
-TGSP_REMOVE_DATA === true
+AISP_REMOVE_DATA === true
 ```
 
 Without that explicit constant, uninstall must preserve settings, post metadata, history, and the log table.
@@ -344,10 +344,10 @@ The current OpenAI integration is server-side and uses the Responses API.
 Production checks must verify:
 
 - the API key remains server-side;
-- `TGSP_OPENAI_API_KEY` may override the stored option when defined;
+- `AISP_OPENAI_API_KEY` may override the stored option when defined;
 - the saved key is not cleared merely because the settings field is submitted blank;
 - the configured model remains a setting and the current default remains documented;
-- the administrator-configurable caption prompt remains stored in `tgsp_openai_caption_prompt`;
+- the administrator-configurable caption prompt remains stored in `aisp_openai_caption_prompt`;
 - a missing or meaninglessly empty caption prompt falls back to the built-in default;
 - editor HTML is sanitized and normalized to readable plain text before it is sent as Responses API instructions;
 - PHP-enforced platform, schema, canonical URL, X-length, and featured-image validation remains authoritative regardless of the editable prompt;
@@ -381,7 +381,7 @@ The plugin must not silently switch to queueing or scheduling.
 Also verify:
 
 - API key remains server-side;
-- `TGSP_BUFFER_API_KEY` may override the stored option when defined;
+- `AISP_BUFFER_API_KEY` may override the stored option when defined;
 - organization/channel discovery remains admin-only;
 - Facebook, LinkedIn, and X channel mappings remain separate;
 - missing mappings fail cleanly;
@@ -406,7 +406,7 @@ Preserve:
 - explicit force behavior for `Share Again`;
 - the short per-post publishing lock;
 - stale lock recovery;
-- legacy `_social_publisher_status = webhook_sent` protection;
+- legacy `_aisp_status = webhook_sent` protection;
 - Buffer reconciliation before retrying a stored `processing` state;
 - partial/failure states that allow only appropriate retry behavior.
 
@@ -440,7 +440,7 @@ The legacy webhook delivery method is a supported compatibility path.
 
 Preserve unless explicitly deprecated:
 
-- `tgsp_delivery_method = webhook`;
+- `aisp_delivery_method = webhook`;
 - webhook URL and secret options;
 - server-side secret header behavior;
 - connection-test behavior;
@@ -448,7 +448,7 @@ Preserve unless explicitly deprecated:
 - per-platform normalized response support;
 - HTTP 2xx legacy responses without a `platforms` object being treated as accepted/unconfirmed rather than falsely published;
 - `docs/webhook-response-schema.json` when the schema remains part of the shipped compatibility contract;
-- the older `TGSP_Webhook` class when current source intentionally retains it for backward compatibility.
+- the older `AISP_Webhook` class when current source intentionally retains it for backward compatibility.
 
 Do not delete apparently duplicate webhook code until actual call paths and compatibility requirements are verified.
 
@@ -501,19 +501,19 @@ Do not remove `readme.txt` or `docs/webhook-response-schema.json` merely because
 The internal plugin directory is permanently:
 
 ```text
-techgenyz-social-publisher/
+ai-social-publisher/
 ```
 
 The main plugin file is permanently:
 
 ```text
-techgenyz-social-publisher/techgenyz-social-publisher.php
+ai-social-publisher/ai-social-publisher.php
 ```
 
 The plugin basename must remain:
 
 ```text
-techgenyz-social-publisher/techgenyz-social-publisher.php
+ai-social-publisher/ai-social-publisher.php
 ```
 
 The internal directory must not contain a version number.
@@ -560,7 +560,7 @@ A static search is evidence, not proof of runtime behavior.
 
 # 22. SEO / Rank Math / Schema / Frontend Non-Interference Checks
 
-TechGenyz Social Publisher is **not** the SEO authority for TechGenyz.com. Its production release must therefore prove that it does not interfere with the site's existing SEO stack or rendered frontend behavior.
+AI Social Publisher is **not** the SEO authority for TechGenyz.com. Its production release must therefore prove that it does not interfere with the site's existing SEO stack or rendered frontend behavior.
 
 For every production candidate, perform a source-level non-interference audit covering at minimum:
 
@@ -688,7 +688,7 @@ Copy runtime-required production files only
 Apply Candidate Production Version only in staging
         ↓
 Create exactly one root:
-techgenyz-social-publisher/
+ai-social-publisher/
         ↓
 Build versioned outer ZIP
         ↓
@@ -714,7 +714,7 @@ After packaging, inspect the actual archive rather than assuming staging was cop
 Confirm:
 
 - exactly one top-level plugin root;
-- root name = `techgenyz-social-publisher/`;
+- root name = `ai-social-publisher/`;
 - main plugin file exists at the expected path;
 - `uninstall.php` is present when the current release uses it;
 - all required `includes/`, `includes/social/`, and `assets/` files are present;

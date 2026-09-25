@@ -2,14 +2,14 @@
 /**
  * Server-side OpenAI caption generation.
  *
- * @package TechGenyzSocialPublisher
+ * @package AISocialPublisher
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-final class TGSP_OpenAI_Client {
+final class AISP_OpenAI_Client {
 	const ENDPOINT = 'https://api.openai.com/v1/responses';
 
 	/**
@@ -76,7 +76,7 @@ final class TGSP_OpenAI_Client {
 	 * @return string
 	 */
 	public static function caption_prompt() {
-		$prompt = self::normalize_caption_prompt( get_option( 'tgsp_openai_caption_prompt', '' ) );
+		$prompt = self::normalize_caption_prompt( get_option( 'aisp_openai_caption_prompt', '' ) );
 		return '' === $prompt ? self::default_caption_prompt() : $prompt;
 	}
 
@@ -90,15 +90,15 @@ final class TGSP_OpenAI_Client {
 	public static function generate( WP_Post $post, array $platforms ) {
 		$api_key = self::api_key();
 		if ( '' === $api_key ) {
-			return new WP_Error( 'tgsp_openai_not_configured', __( 'Configure the OpenAI API key before generating captions.', 'techgenyz-social-publisher' ) );
+			return new WP_Error( 'aisp_openai_not_configured', __( 'Configure the OpenAI API key before generating captions.', 'ai-social-publisher' ) );
 		}
 
 		$platforms = array_values( array_intersect( array( 'facebook', 'linkedin', 'x' ), array_map( 'sanitize_key', $platforms ) ) );
 		if ( ! $platforms ) {
-			return new WP_Error( 'tgsp_no_platforms', __( 'Select at least one platform.', 'techgenyz-social-publisher' ) );
+			return new WP_Error( 'aisp_no_platforms', __( 'Select at least one platform.', 'ai-social-publisher' ) );
 		}
 
-		$data   = TGSP_Social_Payload::article_values( $post );
+		$data   = AISP_Social_Payload::article_values( $post );
 		$input  = array(
 			'title'     => $data['title'],
 			'excerpt'   => $data['excerpt'],
@@ -115,7 +115,7 @@ final class TGSP_OpenAI_Client {
 			'additionalProperties' => false,
 		);
 		$body   = array(
-			'model'        => TGSP_Settings::openai_model(),
+			'model'        => AISP_Settings::openai_model(),
 			'instructions' => self::caption_prompt(),
 			'input'        => wp_json_encode( $input ),
 			'text'         => array(
@@ -148,7 +148,7 @@ final class TGSP_OpenAI_Client {
 		$code    = (int) wp_remote_retrieve_response_code( $response );
 		$decoded = json_decode( (string) wp_remote_retrieve_body( $response ), true );
 		if ( $code < 200 || $code >= 300 ) {
-			return new WP_Error( 'tgsp_openai_rejected', __( 'OpenAI could not generate captions. Check the configured API access and try again.', 'techgenyz-social-publisher' ), array( 'status_code' => $code ) );
+			return new WP_Error( 'aisp_openai_rejected', __( 'OpenAI could not generate captions. Check the configured API access and try again.', 'ai-social-publisher' ), array( 'status_code' => $code ) );
 		}
 
 		$text = isset( $decoded['output_text'] ) ? $decoded['output_text'] : '';
@@ -166,25 +166,25 @@ final class TGSP_OpenAI_Client {
 		}
 		$captions = json_decode( trim( (string) $text ), true );
 		if ( ! is_array( $captions ) ) {
-			return new WP_Error( 'tgsp_openai_invalid_response', __( 'OpenAI returned an invalid caption response.', 'techgenyz-social-publisher' ) );
+			return new WP_Error( 'aisp_openai_invalid_response', __( 'OpenAI returned an invalid caption response.', 'ai-social-publisher' ) );
 		}
 
 		$result = array();
 		foreach ( $platforms as $platform ) {
 			$caption = isset( $captions[ $platform ] ) ? sanitize_textarea_field( $captions[ $platform ] ) : '';
 			if ( '' === trim( $caption ) ) {
-				return new WP_Error( 'tgsp_openai_missing_caption', sprintf( __( 'OpenAI did not return a %s caption.', 'techgenyz-social-publisher' ), $platform ) );
+				return new WP_Error( 'aisp_openai_missing_caption', sprintf( __( 'OpenAI did not return a %s caption.', 'ai-social-publisher' ), $platform ) );
 			}
 			if ( 'x' === $platform ) {
-				$caption = TGSP_Caption_Generator::prepare_x_caption( $caption, $data['url'] );
-				if ( TGSP_Caption_Generator::weighted_length( $caption ) > 280 ) {
-					return new WP_Error( 'tgsp_openai_x_too_long', __( 'OpenAI returned an X caption that exceeds the weighted character limit.', 'techgenyz-social-publisher' ) );
+				$caption = AISP_Caption_Generator::prepare_x_caption( $caption, $data['url'] );
+				if ( AISP_Caption_Generator::weighted_length( $caption ) > 280 ) {
+					return new WP_Error( 'aisp_openai_x_too_long', __( 'OpenAI returned an X caption that exceeds the weighted character limit.', 'ai-social-publisher' ) );
 				}
 			} elseif ( 1 !== substr_count( $caption, $data['url'] ) ) {
-				return new WP_Error( 'tgsp_openai_invalid_url_count', sprintf( __( 'OpenAI must return the article URL exactly once in the %s caption.', 'techgenyz-social-publisher' ), ucfirst( $platform ) ) );
+				return new WP_Error( 'aisp_openai_invalid_url_count', sprintf( __( 'OpenAI must return the article URL exactly once in the %s caption.', 'ai-social-publisher' ), ucfirst( $platform ) ) );
 			}
 			if ( ! empty( $data['featured_image'] ) && false !== strpos( $caption, $data['featured_image'] ) ) {
-				return new WP_Error( 'tgsp_openai_featured_image_in_caption', sprintf( __( 'OpenAI included the featured image URL in the %s caption.', 'techgenyz-social-publisher' ), ucfirst( $platform ) ) );
+				return new WP_Error( 'aisp_openai_featured_image_in_caption', sprintf( __( 'OpenAI included the featured image URL in the %s caption.', 'ai-social-publisher' ), ucfirst( $platform ) ) );
 			}
 			$result[ $platform ] = $caption;
 		}
@@ -192,9 +192,12 @@ final class TGSP_OpenAI_Client {
 	}
 
 	private static function api_key() {
+		if ( defined( 'AISP_OPENAI_API_KEY' ) && AISP_OPENAI_API_KEY ) {
+			return trim( (string) AISP_OPENAI_API_KEY );
+		}
 		if ( defined( 'TGSP_OPENAI_API_KEY' ) && TGSP_OPENAI_API_KEY ) {
 			return trim( (string) TGSP_OPENAI_API_KEY );
 		}
-		return trim( (string) get_option( 'tgsp_openai_api_key', '' ) );
+		return trim( (string) get_option( 'aisp_openai_api_key', '' ) );
 	}
 }

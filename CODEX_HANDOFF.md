@@ -1,4 +1,24 @@
-# TechGenyz Social Publisher — CODEX HANDOFF
+# AI Social Publisher — CODEX HANDOFF
+
+## Identity migration compatibility
+
+The development rename from TechGenyz Social Publisher to AI Social Publisher is handled by
+`AISP_Identity_Migration`. It copies legacy `tgsp_*` options, publishing post metadata, and rows
+from the legacy log table into their `aisp_*` replacements without overwriting destination data
+or deleting rollback data. Serialized post metadata is copied in the database unchanged. Only a
+legacy lock that is still active inside the normal 120-second lock window is carried forward.
+
+Runtime credential precedence during the development transition is:
+
+1. `AISP_OPENAI_API_KEY` / `AISP_BUFFER_API_KEY`;
+2. the corresponding legacy `TGSP_*` constant;
+3. the saved `aisp_*` WordPress option.
+
+The legacy destructive uninstall constant is deliberately not a fallback. Only
+`AISP_REMOVE_DATA === true` authorizes removal by the renamed plugin.
+
+The external webhook header `X-Techgenyz-Webhook-Key` and Buffer source marker
+`techgenyz-wordpress` remain unchanged external contracts.
 
 Last updated: 2026-09-14
 
@@ -6,7 +26,7 @@ Version authority notice: this file does not define the current Development Vers
 
 ## Purpose
 
-This document records implementation context, architecture, compatibility decisions, protected identifiers, and historical behavior for TechGenyz Social Publisher.
+This document records implementation context, architecture, compatibility decisions, protected identifiers, and historical behavior for AI Social Publisher.
 
 It exists so future Codex sessions can understand why the current implementation works the way it does and avoid accidentally removing compatibility or safety behavior.
 
@@ -19,19 +39,19 @@ This document must never override the actual current source or the production le
 The handoff was created from the uploaded test build:
 
 ```text
-techgenyz-social-publisher-1.6.1-test-build.zip
+ai-social-publisher-1.6.1-test-build.zip
 ```
 
 Inspected source metadata:
 
 ```text
-Plugin Name: TechGenyz Social Publisher
+Plugin Name: AI Social Publisher
 Plugin header version: 1.6.1
-TGSP_VERSION: 1.6.1
+AISP_VERSION: 1.6.1
 readme.txt Stable tag: 1.6.1
 Requires WordPress: 6.2+
 Requires PHP: 7.4+
-Text Domain: techgenyz-social-publisher
+Text Domain: ai-social-publisher
 ```
 
 These values describe the inspected baseline only. They are not a production ledger.
@@ -44,13 +64,13 @@ The intended WordPress plugin identity is:
 
 ```text
 Internal plugin directory:
-techgenyz-social-publisher/
+ai-social-publisher/
 
 Main plugin file:
-techgenyz-social-publisher/techgenyz-social-publisher.php
+ai-social-publisher/ai-social-publisher.php
 
 Plugin basename:
-techgenyz-social-publisher/techgenyz-social-publisher.php
+ai-social-publisher/ai-social-publisher.php
 ```
 
 Production upgrades must preserve this identity so WordPress treats later packages as upgrades to the same plugin.
@@ -60,7 +80,7 @@ Production upgrades must preserve this identity so WordPress treats later packag
 # 3. Current High-Level Architecture
 
 ```text
-techgenyz-social-publisher.php
+ai-social-publisher.php
         │
         ├── Logger / database table
         ├── Security helpers
@@ -79,8 +99,8 @@ techgenyz-social-publisher.php
 Current project layout:
 
 ```text
-techgenyz-social-publisher/
-├── techgenyz-social-publisher.php
+ai-social-publisher/
+├── ai-social-publisher.php
 ├── uninstall.php
 ├── readme.txt
 ├── assets/
@@ -108,7 +128,7 @@ techgenyz-social-publisher/
 
 # 4. Core Product Model
 
-TechGenyz Social Publisher is currently an **editor-driven immediate social publishing tool**.
+AI Social Publisher is currently an **editor-driven immediate social publishing tool**.
 
 The intended flow is:
 
@@ -195,19 +215,19 @@ Human review is part of the product design. OpenAI generation does not directly 
 REST namespace:
 
 ```text
-tgsp/v1
+aisp/v1
 ```
 
 Current routes include:
 
 ```text
-POST /tgsp/v1/share/{id}
-POST /tgsp/v1/generate/{id}
-POST /tgsp/v1/buffer-status/{id}
-GET  /tgsp/v1/publishing-status/{id}
-POST /tgsp/v1/test-buffer
-GET  /tgsp/v1/buffer-channels
-POST /tgsp/v1/test-webhook
+POST /aisp/v1/share/{id}
+POST /aisp/v1/generate/{id}
+POST /aisp/v1/buffer-status/{id}
+GET  /aisp/v1/publishing-status/{id}
+POST /aisp/v1/test-buffer
+GET  /aisp/v1/buffer-channels
+POST /aisp/v1/test-webhook
 ```
 
 Authorization model:
@@ -241,8 +261,8 @@ Default configured model: gpt-6-luna
 
 API key lookup order:
 
-1. `TGSP_OPENAI_API_KEY` constant when defined/non-empty;
-2. saved option `tgsp_openai_api_key`.
+1. `AISP_OPENAI_API_KEY` constant when defined/non-empty;
+2. saved option `aisp_openai_api_key`.
 
 Generation input includes sanitized article data such as:
 
@@ -259,7 +279,7 @@ The request uses structured JSON-schema output for exactly the requested platfor
 Caption-generation instructions are administrator-configurable through the protected option:
 
 ```text
-tgsp_openai_caption_prompt
+aisp_openai_caption_prompt
 ```
 
 The Settings page uses the native WordPress editor. Safe saved editor content is normalized to readable plain text before being sent to OpenAI. A missing or meaninglessly empty value falls back to the built-in default prompt. The editable prompt controls editorial guidance only; PHP continues to enforce the supported platform allowlist, strict JSON schema, canonical URL rules, X normalization/weighted limit, featured-image URL rejection, and malformed-response handling.
@@ -278,7 +298,7 @@ The returned data is validated before being returned to the editor.
 
 # 10. X Caption Invariant
 
-X has dedicated outbound normalization in `TGSP_Caption_Generator`.
+X has dedicated outbound normalization in `AISP_Caption_Generator`.
 
 Important behavior:
 
@@ -301,7 +321,7 @@ Do not replace it with a raw `strlen()` limit or client-only validation.
 Current default behavior:
 
 ```text
-tgsp_delivery_method = buffer
+aisp_delivery_method = buffer
 ```
 
 The default applies when no saved delivery-method option exists. An explicit saved legacy webhook selection must remain preserved.
@@ -342,10 +362,10 @@ The plugin can discover Buffer organizations and Publish channels.
 Saved mapping identifiers:
 
 ```text
-tgsp_buffer_organization_id
-tgsp_buffer_channel_facebook
-tgsp_buffer_channel_linkedin
-tgsp_buffer_channel_x
+aisp_buffer_organization_id
+aisp_buffer_channel_facebook
+aisp_buffer_channel_linkedin
+aisp_buffer_channel_x
 ```
 
 Each platform must have an explicit mapped Buffer channel before publishing.
@@ -403,7 +423,7 @@ This is a major duplicate-protection invariant.
 Per-platform state is stored in:
 
 ```text
-_social_publisher_platform_statuses
+_aisp_platform_statuses
 ```
 
 A normal retry skips platform states that are already effectively complete or safely in progress, including current successful/accepted/processing states.
@@ -419,7 +439,7 @@ If all enabled platforms are already complete, normal publishing returns an alre
 Legacy posts using:
 
 ```text
-_social_publisher_status = webhook_sent
+_aisp_status = webhook_sent
 ```
 
 also remain protected and require the force path before re-sharing.
@@ -431,7 +451,7 @@ also remain protected and require the force path before re-sharing.
 The plugin uses:
 
 ```text
-_social_publisher_lock
+_aisp_lock
 ```
 
 as a short-lived per-post lock to reduce overlapping/double-send requests.
@@ -449,11 +469,11 @@ Do not replace this with a non-atomic read/write pattern without understanding t
 Additional historical/summary post metadata:
 
 ```text
-_social_publisher_status
-_social_publisher_sent_time
+_aisp_status
+_aisp_sent_time
 ```
 
-The overall status supports UI/history compatibility while per-platform details live in `_social_publisher_platform_statuses`.
+The overall status supports UI/history compatibility while per-platform details live in `_aisp_platform_statuses`.
 
 Current UI states include concepts such as:
 
@@ -476,23 +496,23 @@ The older webhook workflow is intentionally retained as a selectable delivery me
 Relevant settings include:
 
 ```text
-tgsp_webhook_url
-tgsp_webhook_secret
-tgsp_webhook_connection_status
-tgsp_webhook_last_success
-tgsp_message_format
+aisp_webhook_url
+aisp_webhook_secret
+aisp_webhook_connection_status
+aisp_webhook_last_success
+aisp_message_format
 ```
 
 The active modular transport is:
 
 ```text
-TGSP_Social_Webhook
+AISP_Social_Webhook
 ```
 
 The older class:
 
 ```text
-TGSP_Webhook
+AISP_Webhook
 ```
 
 is still loaded and explicitly marked as retained for backward compatibility.
@@ -548,34 +568,34 @@ Keep canonical article data server-derived rather than trusting arbitrary browse
 Settings page is implemented by:
 
 ```text
-TGSP_Settings
+AISP_Settings
 ```
 
 Important settings currently include:
 
 ```text
-tgsp_delivery_method
-tgsp_openai_api_key
-tgsp_openai_model
-tgsp_openai_caption_prompt
-tgsp_buffer_api_key
-tgsp_buffer_organization_id
-tgsp_buffer_channel_facebook
-tgsp_buffer_channel_linkedin
-tgsp_buffer_channel_x
-tgsp_webhook_url
-tgsp_webhook_secret
-tgsp_webhook_connection_status
-tgsp_webhook_last_success
-tgsp_enable_facebook
-tgsp_enable_linkedin
-tgsp_enable_x
-tgsp_facebook_caption_template
-tgsp_linkedin_caption_template
-tgsp_x_caption_template
-tgsp_message_format
-tgsp_debug_logging
-tgsp_db_version
+aisp_delivery_method
+aisp_openai_api_key
+aisp_openai_model
+aisp_openai_caption_prompt
+aisp_buffer_api_key
+aisp_buffer_organization_id
+aisp_buffer_channel_facebook
+aisp_buffer_channel_linkedin
+aisp_buffer_channel_x
+aisp_webhook_url
+aisp_webhook_secret
+aisp_webhook_connection_status
+aisp_webhook_last_success
+aisp_enable_facebook
+aisp_enable_linkedin
+aisp_enable_x
+aisp_facebook_caption_template
+aisp_linkedin_caption_template
+aisp_x_caption_template
+aisp_message_format
+aisp_debug_logging
+aisp_db_version
 ```
 
 Blank secret fields preserve the previously stored key/secret rather than unintentionally clearing it.
@@ -591,7 +611,7 @@ Each platform can have its own caption template.
 If a platform template is empty, the caption generator checks the legacy:
 
 ```text
-tgsp_message_format
+aisp_message_format
 ```
 
 before falling back to platform defaults.
@@ -619,8 +639,8 @@ Do not remove the legacy format fallback without a migration plan.
 OpenAI and Buffer credentials may be stored as WordPress options, but the preferred server-defined alternatives are supported:
 
 ```text
-TGSP_OPENAI_API_KEY
-TGSP_BUFFER_API_KEY
+AISP_OPENAI_API_KEY
+AISP_BUFFER_API_KEY
 ```
 
 Secrets must remain server-side.
@@ -643,7 +663,7 @@ Do not add API credentials to:
 Custom table:
 
 ```text
-{$wpdb->prefix}social_publish_logs
+{$wpdb->prefix}aisp_publish_logs
 ```
 
 Current schema stores fields including:
@@ -666,7 +686,7 @@ Indexes include post/status/platform/attempt-oriented access.
 
 Table creation/upgrades use WordPress `dbDelta()`.
 
-`tgsp_db_version` is updated to the current plugin release metadata version after table creation/upgrade.
+`aisp_db_version` is updated to the current plugin release metadata version after table creation/upgrade.
 
 Existing rows are expected to survive upgrades.
 
@@ -683,7 +703,7 @@ Activation creates or upgrades the log table.
 On admin boot, if:
 
 ```text
-TGSP_VERSION !== get_option('tgsp_db_version')
+AISP_VERSION !== get_option('aisp_db_version')
 ```
 
 the table upgrade routine runs again through `dbDelta()`.
@@ -699,7 +719,7 @@ Current uninstall behavior is preserve-by-default.
 Destructive cleanup executes only when:
 
 ```text
-TGSP_REMOVE_DATA === true
+AISP_REMOVE_DATA === true
 ```
 
 is defined at uninstall time.
@@ -717,10 +737,10 @@ Deactivation is not the destructive cleanup path.
 The current source defines the dedicated development-version authority:
 
 ```text
-TGSP_DEVELOPMENT_VERSION = 1.6.2
+AISP_DEVELOPMENT_VERSION = 1.6.2
 ```
 
-This remains separate from the production plugin header, `TGSP_VERSION`, readme Stable tag, and production ledger.
+This remains separate from the production plugin header, `AISP_VERSION`, readme Stable tag, and production ledger.
 
 ---
 

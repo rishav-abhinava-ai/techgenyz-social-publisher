@@ -1,4 +1,4 @@
-=== TechGenyz Social Publisher ===
+=== AI Social Publisher ===
 Contributors: techgenyz
 Tags: social media, webhook, n8n, publishing
 Requires at least: 6.2
@@ -11,7 +11,7 @@ Generate editable captions with OpenAI and immediately publish selected channels
 
 == Description ==
 
-TechGenyz Social Publisher adds a visible Social column to Posts > All Posts and keeps the Share Now control in the post editor. Both controls reuse the same popup, where an editor can select Facebook, LinkedIn, and X, generate separate captions with OpenAI, review or edit the exact outgoing text, and immediately publish through mapped Buffer channels.
+AI Social Publisher adds a visible Social column to Posts > All Posts and keeps the Share Now control in the post editor. Both controls reuse the same popup, where an editor can select Facebook, LinkedIn, and X, generate separate captions with OpenAI, review or edit the exact outgoing text, and immediately publish through mapped Buffer channels.
 
 Buffer publishing uses the current GraphQL createPost mutation with schedulingType automatic and mode shareNow. It does not use addToQueue, WordPress scheduling, or a second Buffer action.
 
@@ -22,7 +22,7 @@ Version 1.6.2 adds an administrator-configurable OpenAI caption prompt while pre
 1. Back up WordPress and the database.
 2. Upload the plugin ZIP through Plugins > Add New > Upload Plugin.
 3. Replace the existing version when WordPress asks, then activate it.
-4. Open Social Publisher in WordPress Admin and select Buffer API as the delivery method.
+4. Open AI Social Publisher in WordPress Admin and select Buffer API as the delivery method.
 5. Save the server-side OpenAI and Buffer API keys.
 6. Click Test Buffer and load channels, map Facebook, LinkedIn, and X, then save settings.
 7. Open Posts > All Posts, use Share Now in the Social column, generate and review captions, then click Share Now.

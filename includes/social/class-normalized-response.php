@@ -2,14 +2,14 @@
 /**
  * Normalizes webhook responses into per-platform results.
  *
- * @package TechGenyzSocialPublisher
+ * @package AISocialPublisher
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-final class TGSP_Normalized_Response {
+final class AISP_Normalized_Response {
 	/**
 	 * Normalizes decoded webhook data.
 	 *
@@ -29,7 +29,7 @@ final class TGSP_Normalized_Response {
 				$results[ $platform ] = array(
 					'success'       => true,
 					'status'        => 'accepted',
-					'message'       => __( 'Accepted by the automation webhook; publication was not confirmed.', 'techgenyz-social-publisher' ),
+					'message'       => __( 'Accepted by the automation webhook; publication was not confirmed.', 'ai-social-publisher' ),
 					'remote_id'     => '',
 					'response_code' => absint( $http_code ),
 				);
@@ -55,7 +55,7 @@ final class TGSP_Normalized_Response {
 		return array(
 			'success'       => $success,
 			'status'        => $status,
-			'message'       => sanitize_text_field( isset( $value['message'] ) ? $value['message'] : ( $success ? __( 'Published successfully.', 'techgenyz-social-publisher' ) : __( 'Publishing failed.', 'techgenyz-social-publisher' ) ) ),
+			'message'       => sanitize_text_field( isset( $value['message'] ) ? $value['message'] : ( $success ? __( 'Published successfully.', 'ai-social-publisher' ) : __( 'Publishing failed.', 'ai-social-publisher' ) ) ),
 			'remote_id'     => sanitize_text_field( isset( $value['remote_id'] ) ? $value['remote_id'] : ( isset( $value['id'] ) ? $value['id'] : '' ) ),
 			'response_code' => absint( isset( $value['response_code'] ) ? $value['response_code'] : $http_code ),
 		);

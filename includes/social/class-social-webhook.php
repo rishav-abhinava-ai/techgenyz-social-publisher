@@ -2,14 +2,14 @@
 /**
  * Webhook transport for the social publishing engine.
  *
- * @package TechGenyzSocialPublisher
+ * @package AISocialPublisher
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-final class TGSP_Social_Webhook {
+final class AISP_Social_Webhook {
 	/**
 	 * Sends a payload to the configured webhook.
 	 *
@@ -17,9 +17,9 @@ final class TGSP_Social_Webhook {
 	 * @return array|WP_Error
 	 */
 	public static function send( array $payload, $record_delivery = true ) {
-		$url = (string) get_option( 'tgsp_webhook_url', '' );
+		$url = (string) get_option( 'aisp_webhook_url', '' );
 		if ( ! $url ) {
-			return new WP_Error( 'tgsp_missing_webhook', __( 'Configure the webhook URL before sharing.', 'techgenyz-social-publisher' ) );
+			return new WP_Error( 'aisp_missing_webhook', __( 'Configure the webhook URL before sharing.', 'ai-social-publisher' ) );
 		}
 
 		$response = wp_safe_remote_post(
@@ -30,7 +30,7 @@ final class TGSP_Social_Webhook {
 				'headers'     => array_filter(
 					array(
 						'Content-Type'             => 'application/json; charset=utf-8',
-						'X-Techgenyz-Webhook-Key' => (string) get_option( 'tgsp_webhook_secret', '' ),
+						'X-Techgenyz-Webhook-Key' => (string) get_option( 'aisp_webhook_secret', '' ),
 					)
 				),
 				'body'        => wp_json_encode( $payload ),
@@ -47,7 +47,7 @@ final class TGSP_Social_Webhook {
 		$body = substr( (string) wp_remote_retrieve_body( $response ), 0, 10000 );
 		if ( $code < 200 || $code >= 300 ) {
 			self::record_connection( false, sprintf( 'HTTP %d', $code ), $record_delivery );
-			return new WP_Error( 'tgsp_webhook_rejected', __( 'The social automation webhook rejected the request.', 'techgenyz-social-publisher' ), array( 'status_code' => $code, 'response' => $body ) );
+			return new WP_Error( 'aisp_webhook_rejected', __( 'The social automation webhook rejected the request.', 'ai-social-publisher' ), array( 'status_code' => $code, 'response' => $body ) );
 		}
 
 		self::record_connection( true, sprintf( 'HTTP %d', $code ), $record_delivery );
@@ -65,9 +65,9 @@ final class TGSP_Social_Webhook {
 	}
 
 	private static function record_connection( $success, $message, $record_delivery ) {
-		update_option( 'tgsp_webhook_connection_status', array( 'success' => (bool) $success, 'message' => sanitize_text_field( $message ), 'checked_at' => current_time( 'mysql', true ) ), false );
+		update_option( 'aisp_webhook_connection_status', array( 'success' => (bool) $success, 'message' => sanitize_text_field( $message ), 'checked_at' => current_time( 'mysql', true ) ), false );
 		if ( $success && $record_delivery ) {
-			update_option( 'tgsp_webhook_last_success', current_time( 'mysql', true ), false );
+			update_option( 'aisp_webhook_last_success', current_time( 'mysql', true ), false );
 		}
 	}
 }

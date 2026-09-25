@@ -1,8 +1,8 @@
-# TechGenyz Social Publisher — PRODUCTION HANDOFF
+# AI Social Publisher — PRODUCTION HANDOFF
 
 ## Purpose
 
-This file is the mandatory production-release contract for TechGenyz Social Publisher.
+This file is the mandatory production-release contract for AI Social Publisher.
 
 **Before creating ANY production ZIP, Codex MUST read this file in full and follow it.**
 
@@ -36,19 +36,19 @@ For every production release:
 The internal WordPress plugin directory is permanently:
 
 ```text
-techgenyz-social-publisher/
+ai-social-publisher/
 ```
 
 The main plugin file is permanently:
 
 ```text
-techgenyz-social-publisher/techgenyz-social-publisher.php
+ai-social-publisher/ai-social-publisher.php
 ```
 
 The plugin basename must remain:
 
 ```text
-techgenyz-social-publisher/techgenyz-social-publisher.php
+ai-social-publisher/ai-social-publisher.php
 ```
 
 The internal directory must not contain a release version.
@@ -56,25 +56,25 @@ The internal directory must not contain a release version.
 Correct:
 
 ```text
-TechGenyz Social Publisher vX.Y.Z Production.zip
-└── techgenyz-social-publisher/
-    └── techgenyz-social-publisher.php
+AI Social Publisher vX.Y.Z Production.zip
+└── ai-social-publisher/
+    └── ai-social-publisher.php
 ```
 
 Incorrect:
 
 ```text
-TechGenyz Social Publisher vX.Y.Z Production.zip
-└── techgenyz-social-publisher-vX.Y.Z/
+AI Social Publisher vX.Y.Z Production.zip
+└── ai-social-publisher-vX.Y.Z/
 ```
 
 Also incorrect:
 
 ```text
-TechGenyz Social Publisher vX.Y.Z Production.zip
-└── techgenyz-social-publisher/
-    └── techgenyz-social-publisher/
-        └── techgenyz-social-publisher.php
+AI Social Publisher vX.Y.Z Production.zip
+└── ai-social-publisher/
+    └── ai-social-publisher/
+        └── ai-social-publisher.php
 ```
 
 Verify the plugin header, text domain, main filename, and basename remain internally consistent.
@@ -86,8 +86,8 @@ Verify the plugin header, text domain, main filename, and basename remain intern
 Expected high-level runtime structure for the current architecture:
 
 ```text
-techgenyz-social-publisher/
-├── techgenyz-social-publisher.php
+ai-social-publisher/
+├── ai-social-publisher.php
 ├── uninstall.php
 ├── readme.txt
 ├── assets/
@@ -166,7 +166,7 @@ Create clean temporary staging directory
 Copy only intended production/distribution files
         ↓
 Create exactly one plugin root:
-techgenyz-social-publisher/
+ai-social-publisher/
         ↓
 Apply candidate release metadata only in staging
         ↓
@@ -189,7 +189,7 @@ Never modify the working development tree merely to set release metadata for pac
 
 # 6. Version Tracking and Authority
 
-TechGenyz Social Publisher uses two logically independent version tracks under this workflow:
+AI Social Publisher uses two logically independent version tracks under this workflow:
 
 1. Development Version
 2. Production Version
@@ -201,7 +201,7 @@ They must not be conflated.
 The intended authoritative source is:
 
 ```text
-TGSP_DEVELOPMENT_VERSION
+AISP_DEVELOPMENT_VERSION
 ```
 
 inside the main plugin file.
@@ -211,7 +211,7 @@ inside the main plugin file.
 The current source establishes the Development Version through:
 
 ```text
-TGSP_DEVELOPMENT_VERSION = 1.6.2
+AISP_DEVELOPMENT_VERSION = 1.6.2
 ```
 
 This source value is independent of the production release version.
@@ -245,9 +245,9 @@ Major-version changes require explicit approval.
 Once both authorities are established:
 
 - plugin header version in staging = Candidate Production Version;
-- `TGSP_VERSION` in staging = Candidate Production Version;
+- `AISP_VERSION` in staging = Candidate Production Version;
 - `readme.txt` Stable tag in staging = Candidate Production Version when shipped;
-- `TGSP_DEVELOPMENT_VERSION` remains the current Development Version;
+- `AISP_DEVELOPMENT_VERSION` remains the current Development Version;
 - working development source remains unchanged;
 - final ZIP filename may include the Candidate Production Version.
 
@@ -350,7 +350,7 @@ Do not rely on client-side button visibility as security.
 REST namespace:
 
 ```text
-tgsp/v1
+aisp/v1
 ```
 
 Audit all registered routes, methods, callbacks, and permission callbacks.
@@ -389,10 +389,10 @@ https://api.openai.com/v1/responses
 Verify:
 
 - API key lookup remains server-side;
-- `TGSP_OPENAI_API_KEY` constant override remains supported if configured;
+- `AISP_OPENAI_API_KEY` constant override remains supported if configured;
 - saved key is not accidentally overwritten by a blank masked field submission;
 - current configured model remains a setting;
-- administrator caption instructions remain configurable through `tgsp_openai_caption_prompt`;
+- administrator caption instructions remain configurable through `aisp_openai_caption_prompt`;
 - a missing or meaninglessly empty saved prompt falls back to the built-in default;
 - saved WYSIWYG content is sanitized and normalized to plain text before being sent as Responses API instructions;
 - the editable prompt cannot replace PHP-enforced schema, URL, X-length, featured-image, or response validation;
@@ -433,7 +433,7 @@ Mandatory regression search:
 - ensure article URL is validated;
 - ensure platform metadata is correctly formed;
 - ensure API key remains server-side;
-- ensure `TGSP_BUFFER_API_KEY` constant override remains supported if configured.
+- ensure `AISP_BUFFER_API_KEY` constant override remains supported if configured.
 
 Any unintended switch from immediate `shareNow` is a production blocker unless explicitly approved.
 
@@ -445,7 +445,7 @@ Verify:
 
 - organization discovery still works against the configured account;
 - channel discovery scopes to publish-capable channels;
-- existing `tgsp_buffer_organization_id` is preserved;
+- existing `aisp_buffer_organization_id` is preserved;
 - existing Facebook/LinkedIn/X channel mapping options are preserved;
 - a missing mapping produces a safe error rather than publishing to an arbitrary channel;
 - channel testing/discovery endpoints remain admin-only.
@@ -488,7 +488,7 @@ If a platform is processing, reconciliation must occur before deciding to send a
 
 The UI should warn/confirm appropriately because a forced share can create duplicate public posts.
 
-Legacy `_social_publisher_status = webhook_sent` records must remain protected.
+Legacy `_aisp_status = webhook_sent` records must remain protected.
 
 A regression that can create unintentional duplicate social posts is a production blocker.
 
@@ -499,7 +499,7 @@ A regression that can create unintentional duplicate social posts is a productio
 Verify the per-post lock:
 
 ```text
-_social_publisher_lock
+_aisp_lock
 ```
 
 still prevents overlapping share attempts.
@@ -543,7 +543,7 @@ The production contract must describe current approved behavior, not silently im
 
 # 21. SEO / Rank Math / Schema / Frontend Non-Interference Gate
 
-TechGenyz Social Publisher is an editorial/social-publishing plugin. It is **not** the site's SEO authority and must not change public SEO output merely by being activated, upgraded, or used to publish social posts.
+AI Social Publisher is an editorial/social-publishing plugin. It is **not** the site's SEO authority and must not change public SEO output merely by being activated, upgraded, or used to publish social posts.
 
 This gate is mandatory for every production candidate.
 
@@ -646,7 +646,7 @@ A verified SEO/indexability/frontend regression is a **CODE-LEVEL / RUNTIME PROD
 
 When legacy webhook remains supported, verify:
 
-- `tgsp_delivery_method = webhook` remains respected when saved;
+- `aisp_delivery_method = webhook` remains respected when saved;
 - upgrades do not force an existing webhook user onto Buffer;
 - webhook URL remains server-side;
 - optional secret remains server-side;
@@ -665,28 +665,28 @@ When legacy webhook remains supported, verify:
 The following stored options are protected identifiers unless an explicit migration is approved:
 
 ```text
-tgsp_delivery_method
-tgsp_openai_api_key
-tgsp_openai_model
-tgsp_openai_caption_prompt
-tgsp_buffer_api_key
-tgsp_buffer_organization_id
-tgsp_buffer_channel_facebook
-tgsp_buffer_channel_linkedin
-tgsp_buffer_channel_x
-tgsp_webhook_url
-tgsp_webhook_secret
-tgsp_webhook_connection_status
-tgsp_webhook_last_success
-tgsp_enable_facebook
-tgsp_enable_linkedin
-tgsp_enable_x
-tgsp_facebook_caption_template
-tgsp_linkedin_caption_template
-tgsp_x_caption_template
-tgsp_message_format
-tgsp_debug_logging
-tgsp_db_version
+aisp_delivery_method
+aisp_openai_api_key
+aisp_openai_model
+aisp_openai_caption_prompt
+aisp_buffer_api_key
+aisp_buffer_organization_id
+aisp_buffer_channel_facebook
+aisp_buffer_channel_linkedin
+aisp_buffer_channel_x
+aisp_webhook_url
+aisp_webhook_secret
+aisp_webhook_connection_status
+aisp_webhook_last_success
+aisp_enable_facebook
+aisp_enable_linkedin
+aisp_enable_x
+aisp_facebook_caption_template
+aisp_linkedin_caption_template
+aisp_x_caption_template
+aisp_message_format
+aisp_debug_logging
+aisp_db_version
 ```
 
 Verify:
@@ -695,7 +695,7 @@ Verify:
 - default `buffer` applies only when no saved delivery method exists;
 - a saved `webhook` selection remains `webhook`;
 - blank masked secret input does not unintentionally clear existing saved secrets;
-- caption template fallbacks preserve legacy `tgsp_message_format` behavior.
+- caption template fallbacks preserve legacy `aisp_message_format` behavior.
 
 ---
 
@@ -704,10 +704,10 @@ Verify:
 Protected historical/state keys:
 
 ```text
-_social_publisher_status
-_social_publisher_sent_time
-_social_publisher_lock
-_social_publisher_platform_statuses
+_aisp_status
+_aisp_sent_time
+_aisp_lock
+_aisp_platform_statuses
 ```
 
 Verify upgrades do not rename/reset these values unintentionally.
@@ -721,7 +721,7 @@ If a migration is introduced, prove that historical posts retain correct share/r
 Protected table identity:
 
 ```text
-{$wpdb->prefix}social_publish_logs
+{$wpdb->prefix}aisp_publish_logs
 ```
 
 Expected current data model includes:
@@ -746,7 +746,7 @@ Verify:
 - historical rows are preserved;
 - table is not dropped/recreated during normal upgrade;
 - new columns/indexes are backward-safe;
-- `tgsp_db_version` updates only as intended;
+- `aisp_db_version` updates only as intended;
 - logs remain bounded;
 - stored response text is sanitized/redacted;
 - credentials are not written to logs;
@@ -808,7 +808,7 @@ If a future deactivation hook exists, inspect it explicitly.
 Current destructive authority:
 
 ```text
-TGSP_REMOVE_DATA === true
+AISP_REMOVE_DATA === true
 ```
 
 ## Flag absent or false
@@ -823,10 +823,10 @@ The current uninstall routine may delete the documented plugin-owned data:
 - the administrator-configurable OpenAI caption prompt;
 - Facebook/LinkedIn/X enable/template/channel options;
 - custom log table;
-- `_social_publisher_status`;
-- `_social_publisher_sent_time`;
-- `_social_publisher_lock`;
-- `_social_publisher_platform_statuses`.
+- `_aisp_status`;
+- `_aisp_sent_time`;
+- `_aisp_lock`;
+- `_aisp_platform_statuses`.
 
 Verify the routine is protected by:
 
@@ -842,7 +842,7 @@ Do not introduce destructive cleanup on normal filesystem deletion, deactivation
 
 # 30. No Duplicate Delete-Data Mechanism
 
-The project currently uses the explicit `TGSP_REMOVE_DATA` constant as the authority for destructive uninstall cleanup.
+The project currently uses the explicit `AISP_REMOVE_DATA` constant as the authority for destructive uninstall cleanup.
 
 Do not add another unrelated checkbox/prompt/automatic purge path unless the user explicitly redesigns the data-removal UX and the handoff is updated accordingly.
 
@@ -854,7 +854,7 @@ Multiple conflicting deletion authorities increase data-loss risk.
 
 Verify activation continues to create/upgrade the log table without overwriting unrelated settings or publishing history.
 
-Verify the admin upgrade check based on `tgsp_db_version` does not become a destructive reset.
+Verify the admin upgrade check based on `aisp_db_version` does not become a destructive reset.
 
 A version mismatch may trigger `dbDelta()`; it must not erase historical rows.
 
@@ -944,13 +944,13 @@ save_post
 publish_post
 transition_post_status
 future_to_publish
-TGSP_OPENAI_API_KEY
-TGSP_BUFFER_API_KEY
+AISP_OPENAI_API_KEY
+AISP_BUFFER_API_KEY
 Authorization
 DROP TABLE
 _social_publisher_
-tgsp_
-social_publish_logs
+aisp_
+aisp_publish_logs
 rank_math
 wp_head
 wp_footer
@@ -1045,7 +1045,7 @@ Any verified blocker = **NOT READY FOR PRODUCTION**.
 
 Examples:
 
-- missing `TGSP_DEVELOPMENT_VERSION` when the workflow requires it;
+- missing `AISP_DEVELOPMENT_VERSION` when the workflow requires it;
 - unseeded/ambiguous Last Production Version;
 - contradictory ledger state.
 
@@ -1152,11 +1152,11 @@ Production blocker: YES/NO
 ## Current authority state
 
 ```text
-Development Version Authority: TGSP_DEVELOPMENT_VERSION in techgenyz-social-publisher.php
+Development Version Authority: AISP_DEVELOPMENT_VERSION in ai-social-publisher.php
 Development Version: 1.6.2
 
 Last Production Version: 1.0.0
-Last Production ZIP: TechGenyz Social Publisher v1.0.0 Production.zip
+Last Production ZIP: AI Social Publisher v1.0.0 Production.zip
 Release Date: 2026-09-16
 SHA-256: 34474939EA05D423F87F40CA2CC3F84415D251E30BBEBF9D1F089D4EAC1F632C
 ```
@@ -1166,7 +1166,7 @@ SHA-256: 34474939EA05D423F87F40CA2CC3F84415D251E30BBEBF9D1F089D4EAC1F632C
 ## Production Release 1.0.0 — 2026-09-16
 
 Last Production Version: 1.0.0  
-Last Production ZIP: TechGenyz Social Publisher v1.0.0 Production.zip  
+Last Production ZIP: AI Social Publisher v1.0.0 Production.zip  
 Development Version: 1.6.1  
 SHA-256: 34474939EA05D423F87F40CA2CC3F84415D251E30BBEBF9D1F089D4EAC1F632C  
 Verdict: READY FOR PRODUCTION  
@@ -1178,7 +1178,7 @@ After a successful release, append a record such as:
 ## Production Release X.Y.Z — YYYY-MM-DD
 
 Last Production Version: X.Y.Z
-Last Production ZIP: TechGenyz Social Publisher vX.Y.Z Production.zip
+Last Production ZIP: AI Social Publisher vX.Y.Z Production.zip
 Development Version: <source value at release time>
 SHA-256: <hash>
 Verdict: READY FOR PRODUCTION

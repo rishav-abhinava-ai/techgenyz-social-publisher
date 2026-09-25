@@ -2,14 +2,14 @@
 /**
  * Payload generation and webhook delivery.
  *
- * @package TechGenyzSocialPublisher
+ * @package AISocialPublisher
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-final class TGSP_Webhook {
+final class AISP_Webhook {
 	/**
 	 * Sends a post to the configured webhook.
 	 *
@@ -17,9 +17,9 @@ final class TGSP_Webhook {
 	 * @return array|WP_Error
 	 */
 	public static function send( WP_Post $post ) {
-		$webhook_url = (string) get_option( 'tgsp_webhook_url', '' );
+		$webhook_url = (string) get_option( 'aisp_webhook_url', '' );
 		if ( ! $webhook_url ) {
-			return new WP_Error( 'tgsp_missing_webhook', __( 'Configure the webhook URL before sharing.', 'techgenyz-social-publisher' ) );
+			return new WP_Error( 'aisp_missing_webhook', __( 'Configure the webhook URL before sharing.', 'ai-social-publisher' ) );
 		}
 
 		$payload  = self::build_payload( $post );
@@ -30,7 +30,7 @@ final class TGSP_Webhook {
 				'redirection' => 0,
 				'headers'     => array_filter( array(
 					'Content-Type' => 'application/json; charset=utf-8',
-					'X-Techgenyz-Webhook-Key' => (string) get_option( 'tgsp_webhook_secret', '' ),
+					'X-Techgenyz-Webhook-Key' => (string) get_option( 'aisp_webhook_secret', '' ),
 				) ),
 				'body'        => wp_json_encode( $payload ),
 				'data_format' => 'body',
@@ -45,8 +45,8 @@ final class TGSP_Webhook {
 		$body = substr( (string) wp_remote_retrieve_body( $response ), 0, 2000 );
 		if ( $code < 200 || $code >= 300 ) {
 			return new WP_Error(
-				'tgsp_webhook_rejected',
-				__( 'The social publishing service rejected the request.', 'techgenyz-social-publisher' ),
+				'aisp_webhook_rejected',
+				__( 'The social publishing service rejected the request.', 'ai-social-publisher' ),
 				array(
 					'status_code' => $code,
 					'response'    => $body,
@@ -81,7 +81,7 @@ final class TGSP_Webhook {
 			'{featured_image}' => $featured_image ? $featured_image : '',
 			'{site_name}'      => get_bloginfo( 'name' ),
 		);
-		$format         = (string) get_option( 'tgsp_message_format', "{title}\n\nRead more:\n{url}" );
+		$format         = (string) get_option( 'aisp_message_format', "{title}\n\nRead more:\n{url}" );
 
 		return array(
 			'title'          => $values['{title}'],

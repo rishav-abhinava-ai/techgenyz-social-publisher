@@ -2,14 +2,14 @@
 /**
  * Database logger.
  *
- * @package TechGenyzSocialPublisher
+ * @package AISocialPublisher
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-final class TGSP_Logger {
+final class AISP_Logger {
 	/**
 	 * Returns the site-prefixed log table name.
 	 *
@@ -17,7 +17,7 @@ final class TGSP_Logger {
 	 */
 	public static function table_name() {
 		global $wpdb;
-		return $wpdb->prefix . 'social_publish_logs';
+		return $wpdb->prefix . 'aisp_publish_logs';
 	}
 
 	/**
@@ -49,7 +49,7 @@ final class TGSP_Logger {
 		) {$charset_collate};";
 
 		dbDelta( $sql );
-		update_option( 'tgsp_db_version', TGSP_VERSION, false );
+		update_option( 'aisp_db_version', AISP_VERSION, false );
 	}
 
 	/**
@@ -75,7 +75,7 @@ final class TGSP_Logger {
 	 * @param bool   $force Write regardless of debug mode.
 	 */
 	public static function add_platform( $post_id, $platform, $status, $response, $details = array(), $force = false ) {
-		if ( ! $force && ! (bool) get_option( 'tgsp_debug_logging', false ) ) {
+		if ( ! $force && ! (bool) get_option( 'aisp_debug_logging', false ) ) {
 			return;
 		}
 
