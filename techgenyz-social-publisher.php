@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'TGSP_VERSION', '1.0.0' );
-define( 'TGSP_DEVELOPMENT_VERSION', '1.6.1' );
+define( 'TGSP_DEVELOPMENT_VERSION', '1.6.2' );
 define( 'TGSP_FILE', __FILE__ );
 define( 'TGSP_DIR', plugin_dir_path( __FILE__ ) );
 define( 'TGSP_URL', plugin_dir_url( __FILE__ ) );

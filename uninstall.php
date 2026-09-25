@@ -24,6 +24,7 @@ delete_option( 'tgsp_webhook_last_success' );
 delete_option( 'tgsp_delivery_method' );
 delete_option( 'tgsp_openai_api_key' );
 delete_option( 'tgsp_openai_model' );
+delete_option( 'tgsp_openai_caption_prompt' );
 delete_option( 'tgsp_buffer_api_key' );
 delete_option( 'tgsp_buffer_organization_id' );
 foreach ( array( 'facebook', 'linkedin', 'x' ) as $platform ) {

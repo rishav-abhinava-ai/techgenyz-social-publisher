@@ -256,6 +256,14 @@ Generation input includes sanitized article data such as:
 
 The request uses structured JSON-schema output for exactly the requested platforms.
 
+Caption-generation instructions are administrator-configurable through the protected option:
+
+```text
+tgsp_openai_caption_prompt
+```
+
+The Settings page uses the native WordPress editor. Safe saved editor content is normalized to readable plain text before being sent to OpenAI. A missing or meaninglessly empty value falls back to the built-in default prompt. The editable prompt controls editorial guidance only; PHP continues to enforce the supported platform allowlist, strict JSON schema, canonical URL rules, X normalization/weighted limit, featured-image URL rejection, and malformed-response handling.
+
 Current caption expectations include:
 
 - promotional social copy rather than a full article summary;
@@ -549,6 +557,7 @@ Important settings currently include:
 tgsp_delivery_method
 tgsp_openai_api_key
 tgsp_openai_model
+tgsp_openai_caption_prompt
 tgsp_buffer_api_key
 tgsp_buffer_organization_id
 tgsp_buffer_channel_facebook
@@ -703,25 +712,15 @@ Deactivation is not the destructive cleanup path.
 
 ---
 
-# 26. Current Source Has No Dedicated Development Version Constant
+# 26. Development Version Authority
 
-The inspected baseline defines:
-
-```text
-TGSP_VERSION = 1.6.1
-```
-
-but does not yet define:
+The current source defines the dedicated development-version authority:
 
 ```text
-TGSP_DEVELOPMENT_VERSION
+TGSP_DEVELOPMENT_VERSION = 1.6.2
 ```
 
-The global TechGenyz production workflow requires development and production version authority to remain separate.
-
-Therefore the repository should introduce a dedicated `TGSP_DEVELOPMENT_VERSION` before the first production release governed by the new three-file handoff system.
-
-Until then, production packaging must not pretend a dedicated development-version authority exists.
+This remains separate from the production plugin header, `TGSP_VERSION`, readme Stable tag, and production ledger.
 
 ---
 

@@ -153,18 +153,9 @@ inside:
 techgenyz-social-publisher/techgenyz-social-publisher.php
 ```
 
-## Current migration state
+## Current authority state
 
-The inspected 1.6.1 test build contains `TGSP_VERSION` and the plugin header version, but it does not yet contain `TGSP_DEVELOPMENT_VERSION`.
-
-Therefore, until a dedicated development-version constant is added:
-
-- do not guess the Development Version from `TGSP_VERSION` for production-ledger purposes;
-- do not treat the plugin header as a dedicated development-version authority;
-- report that the development-version authority is not yet established;
-- STOP production packaging when the production workflow requires an authoritative Development Version.
-
-When the dedicated constant is introduced, it becomes the sole authority for the Development Version.
+The current source defines `TGSP_DEVELOPMENT_VERSION`, and it is the sole authority for the Development Version.
 
 The following must never override it:
 
@@ -239,6 +230,7 @@ Important current options include:
 tgsp_delivery_method
 tgsp_openai_api_key
 tgsp_openai_model
+tgsp_openai_caption_prompt
 tgsp_buffer_api_key
 tgsp_buffer_organization_id
 tgsp_buffer_channel_facebook
@@ -355,6 +347,10 @@ Production checks must verify:
 - `TGSP_OPENAI_API_KEY` may override the stored option when defined;
 - the saved key is not cleared merely because the settings field is submitted blank;
 - the configured model remains a setting and the current default remains documented;
+- the administrator-configurable caption prompt remains stored in `tgsp_openai_caption_prompt`;
+- a missing or meaninglessly empty caption prompt falls back to the built-in default;
+- editor HTML is sanitized and normalized to readable plain text before it is sent as Responses API instructions;
+- PHP-enforced platform, schema, canonical URL, X-length, and featured-image validation remains authoritative regardless of the editable prompt;
 - only supported platform keys are requested;
 - structured output is validated;
 - empty or malformed responses fail safely;

@@ -211,7 +211,7 @@ inside the main plugin file.
 The current source establishes the Development Version through:
 
 ```text
-TGSP_DEVELOPMENT_VERSION = 1.6.1
+TGSP_DEVELOPMENT_VERSION = 1.6.2
 ```
 
 This source value is independent of the production release version.
@@ -392,6 +392,10 @@ Verify:
 - `TGSP_OPENAI_API_KEY` constant override remains supported if configured;
 - saved key is not accidentally overwritten by a blank masked field submission;
 - current configured model remains a setting;
+- administrator caption instructions remain configurable through `tgsp_openai_caption_prompt`;
+- a missing or meaninglessly empty saved prompt falls back to the built-in default;
+- saved WYSIWYG content is sanitized and normalized to plain text before being sent as Responses API instructions;
+- the editable prompt cannot replace PHP-enforced schema, URL, X-length, featured-image, or response validation;
 - supported platforms are allowlisted;
 - article data sent to OpenAI is the intended bounded/sanitized article context;
 - structured response format remains validated;
@@ -664,6 +668,7 @@ The following stored options are protected identifiers unless an explicit migrat
 tgsp_delivery_method
 tgsp_openai_api_key
 tgsp_openai_model
+tgsp_openai_caption_prompt
 tgsp_buffer_api_key
 tgsp_buffer_organization_id
 tgsp_buffer_channel_facebook
@@ -815,6 +820,7 @@ Uninstall must preserve plugin-owned data.
 The current uninstall routine may delete the documented plugin-owned data:
 
 - saved TGSP options;
+- the administrator-configurable OpenAI caption prompt;
 - Facebook/LinkedIn/X enable/template/channel options;
 - custom log table;
 - `_social_publisher_status`;
@@ -1147,7 +1153,7 @@ Production blocker: YES/NO
 
 ```text
 Development Version Authority: TGSP_DEVELOPMENT_VERSION in techgenyz-social-publisher.php
-Development Version: 1.6.1
+Development Version: 1.6.2
 
 Last Production Version: 1.0.0
 Last Production ZIP: TechGenyz Social Publisher v1.0.0 Production.zip

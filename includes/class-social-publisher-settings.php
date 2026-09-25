@@ -43,6 +43,7 @@ final class TGSP_Settings {
 		register_setting( 'tgsp_settings', 'tgsp_delivery_method', array( 'type' => 'string', 'sanitize_callback' => array( __CLASS__, 'sanitize_delivery_method' ), 'default' => 'buffer' ) );
 		register_setting( 'tgsp_settings', 'tgsp_openai_api_key', array( 'type' => 'string', 'sanitize_callback' => array( __CLASS__, 'sanitize_openai_key' ), 'default' => '' ) );
 		register_setting( 'tgsp_settings', 'tgsp_openai_model', array( 'type' => 'string', 'sanitize_callback' => array( __CLASS__, 'sanitize_openai_model' ), 'default' => self::OPENAI_MODEL ) );
+		register_setting( 'tgsp_settings', 'tgsp_openai_caption_prompt', array( 'type' => 'string', 'sanitize_callback' => array( __CLASS__, 'sanitize_openai_caption_prompt' ), 'default' => '' ) );
 		register_setting( 'tgsp_settings', 'tgsp_buffer_api_key', array( 'type' => 'string', 'sanitize_callback' => array( __CLASS__, 'sanitize_buffer_key' ), 'default' => '' ) );
 		register_setting( 'tgsp_settings', 'tgsp_buffer_organization_id', array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field', 'default' => '' ) );
 		foreach ( array( 'facebook', 'linkedin', 'x' ) as $platform ) {
@@ -111,6 +112,7 @@ final class TGSP_Settings {
 		add_settings_section( 'tgsp_openai', __( 'OpenAI caption generation', 'techgenyz-social-publisher' ), '__return_false', self::PAGE );
 		add_settings_field( 'tgsp_openai_api_key', __( 'OpenAI API key', 'techgenyz-social-publisher' ), array( __CLASS__, 'openai_key_field' ), self::PAGE, 'tgsp_openai' );
 		add_settings_field( 'tgsp_openai_model', __( 'OpenAI model', 'techgenyz-social-publisher' ), array( __CLASS__, 'openai_model_field' ), self::PAGE, 'tgsp_openai' );
+		add_settings_field( 'tgsp_openai_caption_prompt', __( 'Caption generation prompt', 'techgenyz-social-publisher' ), array( __CLASS__, 'openai_caption_prompt_field' ), self::PAGE, 'tgsp_openai' );
 		add_settings_section( 'tgsp_buffer', __( 'Buffer immediate publishing', 'techgenyz-social-publisher' ), array( __CLASS__, 'buffer_section' ), self::PAGE );
 		add_settings_field( 'tgsp_buffer_api_key', __( 'Buffer API key', 'techgenyz-social-publisher' ), array( __CLASS__, 'buffer_key_field' ), self::PAGE, 'tgsp_buffer' );
 		add_settings_field( 'tgsp_buffer_organization_id', __( 'Buffer organization ID', 'techgenyz-social-publisher' ), array( __CLASS__, 'buffer_organization_field' ), self::PAGE, 'tgsp_buffer' );
@@ -153,6 +155,10 @@ final class TGSP_Settings {
 	public static function sanitize_delivery_method( $value ) { return in_array( $value, array( 'buffer', 'webhook' ), true ) ? $value : 'buffer'; }
 	public static function sanitize_openai_key( $value ) { $value = sanitize_text_field( (string) $value ); return '' === $value ? (string) get_option( 'tgsp_openai_api_key', '' ) : $value; }
 	public static function sanitize_openai_model( $value ) { $value = sanitize_text_field( (string) $value ); return '' === $value || self::LEGACY_OPENAI_MODEL === $value ? self::OPENAI_MODEL : $value; }
+	public static function sanitize_openai_caption_prompt( $value ) {
+		$value = wp_kses_post( (string) $value );
+		return '' === TGSP_OpenAI_Client::normalize_caption_prompt( $value ) ? '' : $value;
+	}
 	public static function sanitize_buffer_key( $value ) { $value = sanitize_text_field( (string) $value ); return '' === $value ? (string) get_option( 'tgsp_buffer_api_key', '' ) : $value; }
 
 	public static function sanitize_secret( $value ) {
@@ -180,6 +186,25 @@ final class TGSP_Settings {
 	public static function openai_key_field() { self::masked_key_field( 'tgsp_openai_api_key', 'tgsp_openai_api_key', __( 'Stored server-side and never sent to browser JavaScript. TGSP_OPENAI_API_KEY may be defined in wp-config.php instead.', 'techgenyz-social-publisher' ) ); }
 	public static function buffer_key_field() { self::masked_key_field( 'tgsp_buffer_api_key', 'tgsp_buffer_api_key', __( 'Stored server-side and never sent to browser JavaScript. TGSP_BUFFER_API_KEY may be defined in wp-config.php instead.', 'techgenyz-social-publisher' ) ); }
 	public static function openai_model_field() { printf( '<input type="text" class="regular-text code" name="tgsp_openai_model" value="%s" />', esc_attr( self::openai_model() ) ); }
+	public static function openai_caption_prompt_field() {
+		$value = (string) get_option( 'tgsp_openai_caption_prompt', '' );
+		if ( '' === TGSP_OpenAI_Client::normalize_caption_prompt( $value ) ) {
+			$value = TGSP_OpenAI_Client::default_caption_prompt();
+		}
+
+		wp_editor(
+			$value,
+			'tgsp_openai_caption_prompt_editor',
+			array(
+				'media_buttons' => false,
+				'teeny'         => false,
+				'textarea_name' => 'tgsp_openai_caption_prompt',
+				'textarea_rows' => 18,
+				'quicktags'     => true,
+			)
+		);
+		echo '<p class="description">' . esc_html__( 'Controls how OpenAI generates Facebook, LinkedIn, and X captions from the supplied WordPress article. Leave empty to use the built-in default. The plugin continues to enforce its technical output validation.', 'techgenyz-social-publisher' ) . '</p>';
+	}
 	public static function openai_model() {
 		$model = (string) get_option( 'tgsp_openai_model', self::OPENAI_MODEL );
 		if ( self::LEGACY_OPENAI_MODEL === $model ) {

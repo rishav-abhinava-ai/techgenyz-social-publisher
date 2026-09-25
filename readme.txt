@@ -15,7 +15,7 @@ TechGenyz Social Publisher adds a visible Social column to Posts > All Posts and
 
 Buffer publishing uses the current GraphQL createPost mutation with schedulingType automatic and mode shareNow. It does not use addToQueue, WordPress scheduling, or a second Buffer action.
 
-Version 1.6.1 preserves the version 1.4.0/1.5.0 webhook URL, secret, default message, post metadata, duplicate protection, and historical log table.
+Version 1.6.2 adds an administrator-configurable OpenAI caption prompt while preserving the version 1.4.0/1.5.0 webhook URL, secret, default message, post metadata, duplicate protection, and historical log table.
 
 == Installation ==
 
@@ -65,6 +65,13 @@ Only users who can edit a post can share it. Settings and connection tests requi
 * Live publishing requires end-to-end tests with the configured workflow and accounts.
 
 == Changelog ==
+
+= 1.6.2 =
+
+* Added a native WordPress WYSIWYG setting for the OpenAI caption-generation prompt.
+* Preserved the existing editorial instructions as the built-in fallback for missing or empty settings.
+* Sanitized editor content and normalized it to readable plain text before OpenAI requests.
+* Kept platform allowlists, structured output, URL validation, X normalization, and other technical checks code-controlled.
 
 = 1.6.1 =
 
